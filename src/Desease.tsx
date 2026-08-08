@@ -1,16 +1,21 @@
 import React, { FormEvent, useCallback, useRef, useState } from 'react'
 
 export function dieErythrocyte(day: number) {
+	// Convert the number of days into hours and then scale it to the model's 48-hour cycle.
 	const hours = day * 24
 	const x = hours / 48
 
+	// Each step grows exponentially, so the loss increases quickly over time.
 	return 10 ** x
 }
 
 export function findDeathDate(deseaseDate: Date) {
+	// Start from a large erythrocyte count that represents the patient's initial healthy state.
+	// The value is intentionally large so the loop can model gradual depletion over many days.
 	let erythrocyte = 30 * 10 ** 12
 	let deathDate = new Date(deseaseDate)
 
+	// Advance the date in 2-day steps while erythrocyte levels remain above zero.
 	for (
 		let day = 2;
 		erythrocyte > 0;
@@ -34,11 +39,13 @@ export default function Desease() {
 		if (deseaseDateEl.current) {
 			const deseaseDate = deseaseDateEl.current.valueAsDate
 			if (!deseaseDate) {
+				// Guard against an empty input so the UI can show a helpful message.
 				setErrorMessage('Please choose a start date to generate a prediction.')
 				setDeathPrediction(undefined)
 				return
 			}
 
+			// Store the entered date so the result panel can describe the interval clearly.
 			setSelectedDate(deseaseDateEl.current.value)
 			setErrorMessage('')
 			setDeathPrediction(findDeathDate(deseaseDate))
@@ -57,6 +64,7 @@ export default function Desease() {
 		if (deseaseDateEl.current) {
 			deseaseDateEl.current.value = ''
 		}
+		// Reset the UI state so the form is ready for a new prediction.
 		setSelectedDate('')
 		setErrorMessage('')
 		setDeathPrediction(undefined)
