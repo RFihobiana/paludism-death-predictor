@@ -35,5 +35,12 @@ describe('Control input fields of desease UI', () => {
   test('draw starting illness day', () => {
     const enteredDay = screen.getByTestId('desease-days')
     expect(enteredDay.tagName).toBe('INPUT')
+    expect(enteredDay).toBeEmptyDOMElement()
+    expect(enteredDay).toHaveAttribute('type', 'date')
+  })
+
+  test('draw submit button', () => {
+    const okButton = screen.getByRole('button', { name: /predict death/i})
+    expect(okButton).toBeInTheDocument()
   })
 })
