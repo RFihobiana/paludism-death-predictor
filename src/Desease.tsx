@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback, useRef } from 'react'
 import './Desease.css'
 
 /**
@@ -44,6 +44,15 @@ export function findDeathDate(deseaseDate: Date): Date {
 }
 
 export default function Desease() {
+  const deseaseDateEl = useRef<HTMLInputElement>(null)
+
+  // Helper to automatically apply a sample test date for quick evaluation
+  const applySampleDate = useCallback((value: string) => {
+    if (deseaseDateEl.current) {
+      deseaseDateEl.current.value = value
+    }
+  }, [])
+
   return (
     <section className="prediction-card">
       {/* Form section to capture illness start date */}
@@ -56,8 +65,25 @@ export default function Desease() {
           </p>
           <label className="field">
             <span>Illness starting time</span>
-            <input type="date" data-testid="desease-days" id="desease-days" />
+            <input
+              type="date"
+              data-testid="desease-days"
+              id="desease-days"
+              ref={deseaseDateEl}
+            />
           </label>
+
+          <div className="quick-actions">
+            <button
+              type="button"
+              className="ghost-button"
+              onClick={() => {
+                applySampleDate('2026-08-07')
+              }}
+            >
+              Try sample date
+            </button>
+          </div>
         </fieldset>
       </form>
     </section>
