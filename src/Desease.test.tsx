@@ -3,13 +3,24 @@ import ReactDOM from 'react-dom/client'
 import '@testing-library/jest-dom'
 import { fireEvent, screen } from '@testing-library/react'
 import { act } from 'react'
-import Desease, { dieErythrocyte } from './Desease'
+import Desease, { calculateSeverityIndex, dieErythrocyte, findDeathDate } from './Desease'
 
 test('Get the true erythrocyte death from calculation', () => {
-	expect(dieErythrocyte(2)).toBe(10)
-	expect(dieErythrocyte(4)).toBe(100)
-	expect(dieErythrocyte(6)).toBe(1_000)
-	expect(dieErythrocyte(8)).toBe(1_0000)
+	expect(dieErythrocyte(2)).toBeCloseTo(11.79, 2)
+	expect(dieErythrocyte(4)).toBeCloseTo(9.07, 2)
+	expect(dieErythrocyte(6)).toBeCloseTo(6.36, 2)
+	expect(dieErythrocyte(8)).toBeCloseTo(3.64, 2)
+})
+
+test('calculateSeverityIndex reflects higher risk for severe disease', () => {
+	expect(calculateSeverityIndex(1_000_000, 5)).toBeGreaterThan(calculateSeverityIndex(100_000, 5))
+	expect(calculateSeverityIndex(100_000, 2)).toBeLessThan(calculateSeverityIndex(100_000, 8))
+})
+
+test('findDeathDate returns a date after the illness start', () => {
+	const start = new Date('2024-01-15T00:00:00')
+	const predicted = findDeathDate(start)
+	expect(predicted.getTime()).toBeGreaterThan(start.getTime())
 })
 
 describe('Control input fields of desease UI', () => {

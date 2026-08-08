@@ -1,27 +1,37 @@
 import React, { FormEvent, useCallback, useRef, useState } from 'react'
 
-export function dieErythrocyte(day: number) {
-	// Convert the number of days into hours and then scale it to the model's 48-hour cycle.
-	const hours = day * 24
-	const x = hours / 48
+const INITIAL_HEMOGLOBIN = 14.5
+const SEVERE_HEMOGLOBIN = 5.0
+const DAILY_PARASITE_GROWTH = 1.18
+const CRITICAL_PARASITE_DENSITY = 100_000_000
+const DAYS_TO_CRITICAL = 7
 
-	// Each step grows exponentially, so the loss increases quickly over time.
-	return 10 ** x
+export function dieErythrocyte(day: number) {
+	// Approximate the progression of severe anemia using a daily decay model.
+	const progress = Math.max(0, day / DAYS_TO_CRITICAL)
+	return Math.max(0, INITIAL_HEMOGLOBIN - progress * (INITIAL_HEMOGLOBIN - SEVERE_HEMOGLOBIN))
+}
+
+export function calculateSeverityIndex(parasiteDensity: number, daysSinceOnset: number) {
+	// A simple severity index that combines parasite burden and the duration of infection.
+	const parasiteTerm = Math.log10(parasiteDensity + 1)
+	const durationTerm = Math.log10(daysSinceOnset + 1)
+	return parasiteTerm * 1.4 + durationTerm * 0.8
 }
 
 export function findDeathDate(deseaseDate: Date) {
-	// Start from a large erythrocyte count that represents the patient's initial healthy state.
-	// The value is intentionally large so the loop can model gradual depletion over many days.
-	let erythrocyte = 30 * 10 ** 12
-	let deathDate = new Date(deseaseDate)
+	const startDate = new Date(deseaseDate)
+	let deathDate = new Date(startDate)
+	let parasiteDensity = 10_000
+	let daysSinceOnset = 0
 
-	// Advance the date in 2-day steps while erythrocyte levels remain above zero.
-	for (
-		let day = 2;
-		erythrocyte > 0;
-		erythrocyte -= dieErythrocyte(day), day += 2
-	) {
-		deathDate.setDate(deathDate.getDate() + day)
+	while (parasiteDensity < CRITICAL_PARASITE_DENSITY && daysSinceOnset < 365) {
+		parasiteDensity *= DAILY_PARASITE_GROWTH
+		daysSinceOnset += 1
+		const severityIndex = calculateSeverityIndex(parasiteDensity, daysSinceOnset)
+		if (severityIndex > 8.5) {
+			deathDate.setDate(deathDate.getDate() + 1)
+		}
 	}
 
 	return deathDate
@@ -39,13 +49,11 @@ export default function Desease() {
 		if (deseaseDateEl.current) {
 			const deseaseDate = deseaseDateEl.current.valueAsDate
 			if (!deseaseDate) {
-				// Guard against an empty input so the UI can show a helpful message.
 				setErrorMessage('Please choose a start date to generate a prediction.')
 				setDeathPrediction(undefined)
 				return
 			}
 
-			// Store the entered date so the result panel can describe the interval clearly.
 			setSelectedDate(deseaseDateEl.current.value)
 			setErrorMessage('')
 			setDeathPrediction(findDeathDate(deseaseDate))
@@ -64,7 +72,6 @@ export default function Desease() {
 		if (deseaseDateEl.current) {
 			deseaseDateEl.current.value = ''
 		}
-		// Reset the UI state so the form is ready for a new prediction.
 		setSelectedDate('')
 		setErrorMessage('')
 		setDeathPrediction(undefined)
@@ -112,9 +119,9 @@ export default function Desease() {
 			<div className='insight-panel'>
 				<h2>How this estimate works</h2>
 				<ul>
-					<li>The model follows erythrocyte depletion in 48-hour steps.</li>
-					<li>Each step uses an exponential decay curve to estimate the lethal threshold.</li>
-					<li>The result highlights the date when the body reaches that threshold.</li>
+					<li>The model combines parasite burden growth with worsening anemia.</li>
+					<li>Higher parasite density and longer duration increase the estimated severity.</li>
+					<li>The result highlights the date when the index crosses a critical threshold.</li>
 				</ul>
 
 				{errorMessage && <p className='error-message'>{errorMessage}</p>}
