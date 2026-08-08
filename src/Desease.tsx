@@ -53,9 +53,9 @@ export default function Desease() {
   const predictDeath = useCallback((event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if(deseaseDateEl.current) {
+    if (deseaseDateEl.current) {
       const deseaseDate = deseaseDateEl.current.valueAsDate
-      if(!deseaseDate) {
+      if (!deseaseDate) {
         setErrorMessage('Please Choose a start date to generate a prediction.')
         setDeathPrediction(undefined)
         return
@@ -76,13 +76,25 @@ export default function Desease() {
 
   // Clear all input and current predictions
   const clearPrediction = useCallback(() => {
-    if(deseaseDateEl.current) {
+    if (deseaseDateEl.current) {
       deseaseDateEl.current.value = ''
     }
     setSelectedDate('')
     setErrorMessage('')
     setDeathPrediction(undefined)
   }, [])
+
+  // Calculates number of day between start date and predicted outcome
+  const selectedDateValue = selectedDate
+    ? new Date(`${selectedDate}T00:00:00`)
+    : null
+  const daysUntilDeath =
+    deathPrediction && selectedDateValue
+      ? Math.round(
+          (deathPrediction.getTime() - selectedDateValue.getTime()) /
+            86_400_000,
+        )
+      : null
 
   return (
     <section className="prediction-card">
@@ -102,7 +114,7 @@ export default function Desease() {
               id="desease-days"
               ref={deseaseDateEl}
               onChange={() => {
-                if(deseaseDateEl.current) {
+                if (deseaseDateEl.current) {
                   setSelectedDate(deseaseDateEl.current.value)
                   setErrorMessage('')
                 }
@@ -121,28 +133,72 @@ export default function Desease() {
               Try sample date
             </button>
 
-            <button type="button" className="ghost-button" onClick={() => clearPrediction()}>
+            <button
+              type="button"
+              className="ghost-button"
+              onClick={() => clearPrediction()}
+            >
               Clear
             </button>
           </div>
         </fieldset>
 
-        <button type="submit" className='primary-button'>Predict Death</button>
+        <button type="submit" className="primary-button">
+          Predict Death
+        </button>
       </form>
 
       {/* Panel displaying model restrictions, limits, and final calculation outputs */}
-      <div className='insight-panel'>
+      <div className="insight-panel">
         <h2>Model Restrictions & Limits</h2>
         <ul>
-          <li><strong>Purely Theorical:</strong> Assumes uniform cell destruction without accounting for immune defense, spleen filtration, or clinical treatments.</li>
-          <li><strong>Exponential Scale:</strong> Utilizes powers of ten (10<sup>x</sup>), meaning red blood cell destruction scales up aggrevesively over time.</li>
-          <li><strong>Simplified Threshold:</strong> Triggers critical failure once total RBC inventory drops by 50% as a generalized mathmetical benchmark.</li>
+          <li>
+            <strong>Purely Theorical:</strong> Assumes uniform cell destruction
+            without accounting for immune defense, spleen filtration, or
+            clinical treatments.
+          </li>
+          <li>
+            <strong>Exponential Scale:</strong> Utilizes powers of ten (10
+            <sup>x</sup>), meaning red blood cell destruction scales up
+            aggrevesively over time.
+          </li>
+          <li>
+            <strong>Simplified Threshold:</strong> Triggers critical failure
+            once total RBC inventory drops by 50% as a generalized mathmatical
+            benchmark.
+          </li>
         </ul>
       </div>
 
       {/* Display validation error message */}
-      {errorMessage && <p className='error-message'>{errorMessage}</p>}
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
 
+      {/* Display final prediction card if it has been generated */}
+      {deathPrediction && (
+        <div
+          id="death-prediction"
+          className={`result-card urgency-${daysUntilDeath && daysUntilDeath < 28 ? 'critical' : 'moderate'}`}
+        >
+          <p className="result-label">Projected fatal date</p>
+          <p className="result-summary">
+            The patient will surely die at{' '}
+            {deathPrediction.toLocaleDateString()}.
+          </p>
+
+          <h3>
+            {Intl.DateTimeFormat('en-US', {
+              month: 'long',
+              weekday: 'long',
+              year: 'numeric',
+              day: '2-digit',
+            }).format(deathPrediction)}
+          </h3>
+          <p>
+            This estimate is about {daysUntilDeath} days from the selected start
+            date
+          </p>
+        </div>
+      )}
     </section>
   )
 }

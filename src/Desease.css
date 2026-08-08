@@ -83,3 +83,7 @@
   transform: none !important;
   box-shadow: none !important;
 }
+
+#death-prediction {
+  grid-column: 1/3;
+}
