@@ -23,46 +23,107 @@ export function findDeathDate(deseaseDate: Date) {
 }
 
 export default function Desease() {
-	let [deathPrediction, setDeathPrediction] = useState<Date>()
-	let deseaseDateEl = useRef<HTMLInputElement>(null)
+	const [deathPrediction, setDeathPrediction] = useState<Date>()
+	const [errorMessage, setErrorMessage] = useState('')
+	const [selectedDate, setSelectedDate] = useState('')
+	const deseaseDateEl = useRef<HTMLInputElement>(null)
 
-	let predictDeath = useCallback(
-		(ev: FormEvent<HTMLInputElement>) => {
-			ev.preventDefault()
+	const predictDeath = useCallback((ev: FormEvent<HTMLFormElement>) => {
+		ev.preventDefault()
 
-			if (deseaseDateEl.current) {
-				let deseaseDate = deseaseDateEl.current.valueAsDate
-				if (!deseaseDate) return
-
-				setDeathPrediction(findDeathDate(deseaseDate))
+		if (deseaseDateEl.current) {
+			const deseaseDate = deseaseDateEl.current.valueAsDate
+			if (!deseaseDate) {
+				setErrorMessage('Please choose a start date to generate a prediction.')
+				setDeathPrediction(undefined)
+				return
 			}
-		},
-		[deseaseDateEl]
-	)
+
+			setSelectedDate(deseaseDateEl.current.value)
+			setErrorMessage('')
+			setDeathPrediction(findDeathDate(deseaseDate))
+		}
+	}, [])
+
+	const applySampleDate = useCallback((value: string) => {
+		if (deseaseDateEl.current) {
+			deseaseDateEl.current.value = value
+			setSelectedDate(value)
+			setErrorMessage('')
+		}
+	}, [])
+
+	const clearPrediction = useCallback(() => {
+		if (deseaseDateEl.current) {
+			deseaseDateEl.current.value = ''
+		}
+		setSelectedDate('')
+		setErrorMessage('')
+		setDeathPrediction(undefined)
+	}, [])
+
+	const selectedDateValue = selectedDate ? new Date(`${selectedDate}T00:00:00`) : null
+	const daysUntilDeath =
+		deathPrediction && selectedDateValue
+			? Math.round((deathPrediction.getTime() - selectedDateValue.getTime()) / 86_400_000)
+			: null
 
 	return (
-		<>
-			<form method='GET'>
+		<section className='prediction-card'>
+			<form className='prediction-form' method='GET' onSubmit={predictDeath}>
 				<fieldset>
-					<legend>Desease Time</legend>
-					<label>
-						Illness starting time:{' '}
+					<legend>Disease Timeline</legend>
+					<p className='form-intro'>Choose the day symptoms began and the model will estimate the point where the fatal threshold is reached.</p>
+					<label className='field'>
+						<span>Illness starting time</span>
 						<input
 							type='date'
 							data-testid='desease-days'
 							id='desease-days'
 							ref={deseaseDateEl}
+							onChange={() => {
+								if (deseaseDateEl.current) {
+									setSelectedDate(deseaseDateEl.current.value)
+									setErrorMessage('')
+								}
+							}}
 						/>
 					</label>
+					<div className='quick-actions'>
+						<button type='button' className='ghost-button' onClick={() => applySampleDate('2024-01-15')}>
+							Try sample date
+						</button>
+						<button type='button' className='ghost-button' onClick={clearPrediction}>
+							Clear
+						</button>
+					</div>
 				</fieldset>
-				<input type='submit' value='Submit' onClick={predictDeath} />
+				<button type='submit' className='primary-button'>Predict Death</button>
 			</form>
 
-			{deathPrediction && (
-				<div id='death-prediction'>
-					The patient will surely die at {deathPrediction?.toLocaleDateString()}
-				</div>
-			)}
-		</>
+			<div className='insight-panel'>
+				<h2>How this estimate works</h2>
+				<ul>
+					<li>The model follows erythrocyte depletion in 48-hour steps.</li>
+					<li>Each step uses an exponential decay curve to estimate the lethal threshold.</li>
+					<li>The result highlights the date when the body reaches that threshold.</li>
+				</ul>
+
+				{errorMessage && <p className='error-message'>{errorMessage}</p>}
+
+				{deathPrediction && (
+					<div id='death-prediction' className='result-card'>
+						<p className='result-label'>Projected fatal date</p>
+						<p className='result-summary'>
+							The patient will surely die at {deathPrediction.toLocaleDateString()}.
+						</p>
+						<h3>{deathPrediction.toLocaleDateString()}</h3>
+						<p>
+							This estimate is about {daysUntilDeath} days from the selected start date.
+						</p>
+					</div>
+				)}
+			</div>
+		</section>
 	)
 }

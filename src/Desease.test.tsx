@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import '@testing-library/jest-dom'
-import { screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import { act } from 'react'
 import Desease, { dieErythrocyte } from './Desease'
 
@@ -36,7 +36,17 @@ describe('Control input fields of desease UI', () => {
 	})
 
 	test('draw submit button', () => {
-		const okButton = screen.getByText(/submit/iu)
+		const okButton = screen.getByRole('button', { name: /predict death/i })
 		expect(okButton).toBeInTheDocument()
+	})
+
+	test('shows a prediction summary after submitting a date', () => {
+		const input = screen.getByTestId('desease-days') as HTMLInputElement
+		const submitButton = screen.getByRole('button', { name: /predict death/i })
+
+		fireEvent.change(input, { target: { value: '2024-01-15' } })
+		fireEvent.click(submitButton)
+
+		expect(screen.getByText(/the patient will surely die/i)).toBeInTheDocument()
 	})
 })
