@@ -121,12 +121,27 @@ export default function Desease() {
               Try sample date
             </button>
 
-            <button type="submit" className="ghost-button" onClick={() => clearPrediction()}>
+            <button type="button" className="ghost-button" onClick={() => clearPrediction()}>
               Clear
             </button>
           </div>
         </fieldset>
+
+        <button type="submit" className='primary-button'>Predict Death</button>
       </form>
+
+      {/* Panel displaying model restrictions, limits, and final calculation outputs */}
+      <div className='insight-panel'>
+        <h2>Model Restrictions & Limits</h2>
+        <ul>
+          <li><strong>Purely Theorical:</strong> Assumes uniform cell destruction without accounting for immune defense, spleen filtration, or clinical treatments.</li>
+          <li><strong>Exponential Scale:</strong> Utilizes powers of ten (10<sup>x</sup>), meaning red blood cell destruction scales up aggrevesively over time.</li>
+          <li><strong>Simplified Threshold:</strong> Triggers critical failure once total RBC inventory drops by 50% as a generalized mathmetical benchmark.</li>
+        </ul>
+      </div>
+
+      {/* Display validation error message */}
+      {errorMessage && <p className='error-message'>{errorMessage}</p>}
 
     </section>
   )
