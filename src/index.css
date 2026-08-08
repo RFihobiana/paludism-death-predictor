@@ -1,6 +1,12 @@
 :root {
   color-scheme: light;
-  font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  font-family:
+    'Segoe UI',
+    Roboto,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Helvetica Neue',
+    sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: #0f172a;
@@ -24,5 +30,6 @@ input {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }

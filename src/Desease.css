@@ -1,0 +1,85 @@
+
+/* ---- Result placeholder ---- */
+.result-placeholder {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: #94a3b8;
+  background: #f8fafc;
+  border-radius: 16px;
+  border: 1px dashed #cbd5e1;
+}
+
+/* ---- Result card urgency levels ---- */
+.result-card {
+  padding: 1.25rem 1rem;
+  border-radius: 16px;
+  border-left: 6px solid #94a3b8;
+  background: #f8fafc;
+  transition: border-color 0.3s ease;
+}
+
+.result-card.urgency-low {
+  border-left-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.result-card.urgency-moderate {
+  border-left-color: #eab308;
+  background: #fefce8;
+}
+
+.result-card.urgency-critical {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.urgency-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.2rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.result-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.result-card h3 {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 1.5rem;
+  color: #0f172a;
+}
+
+.result-detail {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  color: #334155;
+}
+
+.result-footnote {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* ---- Disable submit button when no date is selected ---- */
+.primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
