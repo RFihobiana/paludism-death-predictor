@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { FormEvent, useCallback, useRef, useState } from 'react'
 import './Desease.css'
 
 /**
@@ -44,7 +44,28 @@ export function findDeathDate(deseaseDate: Date): Date {
 }
 
 export default function Desease() {
+  const [deathPrediction, setDeathPrediction] = useState<Date>()
+  const [errorMessage, setErrorMessage] = useState('')
+  const [selectedDate, setSelectedDate] = useState('')
   const deseaseDateEl = useRef<HTMLInputElement>(null)
+
+  // Handle form submission to calculate and display the prediction date
+  const predictDeath = useCallback((event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if(deseaseDateEl.current) {
+      const deseaseDate = deseaseDateEl.current.valueAsDate
+      if(!deseaseDate) {
+        setErrorMessage('Please Choose a start date to generate a prediction.')
+        setDeathPrediction(undefined)
+        return
+      }
+
+      setSelectedDate(deseaseDateEl.current.value)
+      setErrorMessage('')
+      setDeathPrediction(findDeathDate(deseaseDate))
+    }
+  }, [])
 
   // Helper to automatically apply a sample test date for quick evaluation
   const applySampleDate = useCallback((value: string) => {
@@ -53,10 +74,20 @@ export default function Desease() {
     }
   }, [])
 
+  // Clear all input and current predictions
+  const clearPrediction = useCallback(() => {
+    if(deseaseDateEl.current) {
+      deseaseDateEl.current.value = ''
+    }
+    setSelectedDate('')
+    setErrorMessage('')
+    setDeathPrediction(undefined)
+  }, [])
+
   return (
     <section className="prediction-card">
       {/* Form section to capture illness start date */}
-      <form className="prediction-form" method="GET">
+      <form className="prediction-form" method="GET" onSubmit={predictDeath}>
         <fieldset>
           <legend>Disease Timeline</legend>
           <p className="form-intro">
@@ -70,6 +101,12 @@ export default function Desease() {
               data-testid="desease-days"
               id="desease-days"
               ref={deseaseDateEl}
+              onChange={() => {
+                if(deseaseDateEl.current) {
+                  setSelectedDate(deseaseDateEl.current.value)
+                  setErrorMessage('')
+                }
+              }}
             />
           </label>
 
@@ -83,9 +120,14 @@ export default function Desease() {
             >
               Try sample date
             </button>
+
+            <button type="submit" className="ghost-button" onClick={() => clearPrediction()}>
+              Clear
+            </button>
           </div>
         </fieldset>
       </form>
+
     </section>
   )
 }
