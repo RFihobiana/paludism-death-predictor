@@ -1,17 +1,48 @@
+import React from 'react'
 import './Desease.css'
-
 
 /**
  * Calculates red blood cell (erythrocyte) destruction based on the
  * 48-hour schizogony cycle of Plasmodium falciparum (School Formula)
- * 
+ *
  * @param day The current day of infection
  * @returns Number of erythrocytes destroyed during the cycle step
  */
 export function dieErythrocyte(day: number): number {
-  const hours = day * 24  // Convert days into total hours elapsed
-  const x = hours / 48    // Determine how many 48-hour schizogony cycles have passed
+  const hours = day * 24 // Convert days into total hours elapsed
+  const x = hours / 48 // Determine how many 48-hour schizogony cycles have passed
 
   return 10 ** x
 }
 
+/**
+ * Iterate through infection time using 2-day cycles 
+ * to simulate total red blood cell depletion until a critical threshold is met.
+ * 
+ * @param deseaseDate The initial date when symptoms started
+ * @returns A Date object representing the critical date 
+ */
+export function findDeathDate(deseaseDate: Date): Date {
+  const startDate = new Date(deseaseDate)
+
+  // Initialize total adult human red blood cell count (Around 30 trillion cells)
+  let erythrocyte = 30 * (10**12)
+  let totalDays = 0
+
+  // Loop through 2-day cycles
+  // Stops if red blood cells drop bellow 50% (15 trillion) or safety limit of 365 days in hit
+  for (let day = 2; erythrocyte > 15 * (10**12) && totalDays < 365; day += 2) {
+    const destroyed = dieErythrocyte(day)
+    erythrocyte -= destroyed  // Substract destroyed cell from the total pool 
+    totalDays = day           // Keep track of total elapsed days
+  }
+
+  // Calculate final death date by adding total elapsed disease days to start date
+  let deathDate = new Date(startDate)
+  deathDate.setDate(deathDate.getDate() + totalDays)
+  return deathDate
+}
+
+export default function Desease() {
+  return <div>Desease</div>
+}
